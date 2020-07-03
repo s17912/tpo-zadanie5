@@ -7,11 +7,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @WebServlet("/index")
@@ -32,26 +30,35 @@ public class OrderServlet extends HttpServlet {
             cars.add(new CarModel(data[0], data[1], data[2], Integer.parseInt(data[3]), data[4]));
         }
 
+        List<String> types = new ArrayList<>();
+        List<String> brands = new ArrayList<>();
+        List<String> models = new ArrayList<>();
 
-//        String s_brand =  request.getParameter( "brand" );
-//       // String s_model =  request.getParameter( "brand" );
-//        if(s_brand!=null){
-//            System.out.println("will be filtered"+s_brand);
-//            for (CarModel car:cars) {
-//                if(!car.getBrand().equals(s_brand)){
-//                    cars.remove(car);
-//                }
-//            }
-//        }
+        String s_type = request.getParameter("type");
+        if (s_type != null && s_type.length() != 0) {
+            cars.removeIf(c -> !c.getType().equals(s_type));
+        }
 
+        String s_brand = request.getParameter("brand");
+        if (s_brand != null && s_brand.length() != 0) {
+            cars.removeIf(c -> !c.getBrand().equals(s_brand));
+        }
 
+        String s_model = request.getParameter("model");
+        if (s_model != null && s_model.length() != 0) {
+            cars.removeIf(c -> !c.getModel().equals(s_model));
+        }
 
-        List<String> brands = cars.stream().map(CarModel::getBrand).distinct().collect(Collectors.toList());
+        types = cars.stream().map(CarModel::getType).distinct().collect(Collectors.toList());
+        Collections.sort(types, String.CASE_INSENSITIVE_ORDER);
+
+        brands = cars.stream().map(CarModel::getBrand).distinct().collect(Collectors.toList());
         Collections.sort(brands, String.CASE_INSENSITIVE_ORDER);
 
-        List<String> models = cars.stream().map(CarModel::getModel).collect(Collectors.toList());
+        models = cars.stream().map(CarModel::getModel).distinct().collect(Collectors.toList());
         Collections.sort(models, String.CASE_INSENSITIVE_ORDER);
 
+        request.setAttribute("types", types);
         request.setAttribute("brands", brands);
         request.setAttribute("models", models);
         request.setAttribute("cars", cars);
